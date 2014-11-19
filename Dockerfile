@@ -2,10 +2,9 @@ FROM golang:1.3.3
 
 MAINTAINER lonli078
 
-add go-irc-server /go/
+add . /go/
 
-expose 6667
-
+ENTRYPOINT go build -v -o go-irc-server
 ENTRYPOINT ./go-irc-server -d
 
 #docker run -it -p 6667:6667 --name irc-server lonli078/go-irc-server ./go-irc-server -d
