@@ -4,8 +4,8 @@ MAINTAINER lonli078
 
 add . /go/
 
-ENTRYPOINT go build -v -o go-irc-server
-ENTRYPOINT ./go-irc-server -d
+ENTRYPOINT go build -v -o go-irc-server && ./go-irc-server -d
+#ENTRYPOINT ./go-irc-server -d
 
 #docker run -it -p 6667:6667 --name irc-server lonli078/go-irc-server ./go-irc-server -d
 #docker run -d -p 6667:6667 --name irc-server lonli078/go-irc-server ./go-irc-server -d
