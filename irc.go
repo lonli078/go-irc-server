@@ -87,16 +87,16 @@ func (c *ClientChat) send_message(prefix string, command string, params ...strin
 }
 
 func (c *ClientChat) get_channel(name string) *ChannelChat {
-	//Log("ClientChat.get_channel()", "List chan len->", fmt.Sprintf(":%d", c.ListChannel.Len() ))
+	Log("ClientChat.get_channel()", "List chan len->", fmt.Sprintf(":%d", c.ListChannel.Len() ))
 	for e := c.ListChannel.Front(); e != nil; e = e.Next() {
 		ch := e.Value.(ChannelChat);
 		if ch.Name == name {
-			//Log("ClientChat.get_channel()", "channel found!", ch.Name)
+			Log("ClientChat.get_channel()", "channel found!", ch.Name)
 			return &ch
 		}
 	}
 	Log("ClientChat.get_channel()", "create new channel->", name)
-	ch := &ChannelChat{name, "", list.New()}
+	ch := &ChannelChat{Name:name, UsersList:list.New()}
 	c.ListChannel.PushBack(*ch)
 	return ch
 }
@@ -235,7 +235,7 @@ func irc_PRIVMSG(client *ClientChat, params []string) {
         RPL_AWAY
 	*/
 	recipient := params[0]
-	msg := strings.Join(params[1:], "")
+	msg := strings.Join(params[1:], " ")
 	if strings.HasPrefix(recipient, "#") {
 		ch := client.get_channel(recipient)
         ch.sendmsg(client, msg)
@@ -306,6 +306,20 @@ func irc_LIST(client *ClientChat, params []string) {
 		client.send_message("", stn["RPL_LIST"], client.Name, ch.Name, fmt.Sprintf("%d", ch.count()), ":[+nt] " + ch.Topic)
 	}
 	client.send_message("", stn["RPL_LISTEND"], client.Name, ":END of /LIST")
+}
+
+func irc_TOPIC(client *ClientChat, params []string) {
+	name := params[0]
+	if !strings.HasPrefix(name, "#") {
+		name = "#" + name
+	}
+	ch := client.get_channel(name)
+	if len(params) > 1 {
+		Log("set topic", params[1] )
+		ch.Topic = params[1]
+	}
+	Log(ch.Topic)
+	client.send_message("", stn["RPL_TOPIC"], ch.Topic)
 }
 
 func send_welcome(client *ClientChat) {
@@ -400,6 +414,7 @@ var commands_list = map[string]func(*ClientChat, []string) {
 	"WHO": irc_WHO,
 	"PART": irc_PART,
 	"LIST": irc_LIST,
+	"TOPIC": irc_TOPIC,
 }
 
 var stn = map[string]string {
